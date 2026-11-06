@@ -4,9 +4,27 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>client</title>
+    <meta name="theme-color" content="#F8FAFC" />
+    <title>FinLab — Personal Finance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet" />
+    <script>
+      (() => {
+        try {
+          let preference = localStorage.getItem('finlab-theme');
+          if (preference === 'system') {
+            preference = 'light';
+            localStorage.setItem('finlab-theme', 'light');
+          }
+          const dark = preference === 'dark';
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch { /* ThemeProvider applies the selected theme after startup. */ }
+      })();
+    </script>
   </head>
-  <body>
+  <body style="font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

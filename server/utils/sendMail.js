@@ -1,6 +1,11 @@
 const nodemailer = require("nodemailer");
 
 const sendMail = async (to, subject, html) => {
+  // In test environment, skip outbound network calls and resolve immediately
+  if (process.env.NODE_ENV === "test") {
+    return { messageId: "mock-test-message-id" };
+  }
+
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

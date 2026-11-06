@@ -1,21 +1,23 @@
 const path = require('path');
+const dns = require('dns');
 const mongoose = require('mongoose');
-const dontenv = require('dotenv');
-const dns = require('dns')
+const dotenv = require('dotenv');
 
-dontenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
+// Configure reliable DNS servers (Google Public DNS) to prevent querySrv ECONNREFUSED
+// when local routers or ISP DNS block SRV records.
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+} catch (e) {
+  // If restricted, fallback to default resolver
+}
 
-// MongoDB connecton establishment
-const connectDB = async()=>{
-    try{
-        await mongoose.connect(process.env.MONGO_URI); // MongoDB connection string from env file
-        console.log('MongoDB Connected Sucessfully');
-    } catch (error){
-        console.error('MongoDb Connection Failed :', error.message || error);
-        process.exit(1);
-    }
+// MongoDB connection establishment
+const connectDB = async () => {
+  await mongoose.connect(process.env.MONGO_URI);
+  console.log('MongoDB Connected Successfully');
+  return mongoose.connection;
 };
 
-module.exports = connectDB
+module.exports = connectDB;

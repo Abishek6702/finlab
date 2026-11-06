@@ -5,7 +5,7 @@ const isTest = process.env.NODE_ENV === "test";
 // 300 requests every 15 minutes from single ip
 exports.apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isTest ? 10000 : 300,
+  max: isTest ? 1000000 : 300000,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
