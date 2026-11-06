@@ -382,8 +382,8 @@ exports.forgotPassword = async (req, res, next) => {
       user.passwordResetExpires = new Date(Date.now() + expiresMinutes * 60 * 1000);
       await user.save();
 
-      // Reset URL pointing to client on port 9002
-      const frontendClientUrl = "http://localhost:9002";
+      // Reset URL pointing to client on port 9002 (or production client URL)
+      const frontendClientUrl = (process.env.CLIENT_URL || "http://localhost:9002").replace(/\/+$/, "");
       const resetUrl = `${frontendClientUrl}/reset-password?token=${resetToken}`;
 
       try {
