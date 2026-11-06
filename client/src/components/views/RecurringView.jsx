@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Pencil, Plus, RefreshCw, Repeat, Trash2, X } from 'lucide-react';
+import { LayoutGrid, Pencil, Plus, RefreshCw, Repeat, Table2, Trash2, X } from 'lucide-react';
 import { recurringApi, accountApi, categoryApi } from '../../api/apiClient';
 import { currencyStep, formatCurrencyAmount } from '../../moneyUtils';
 
@@ -22,6 +22,9 @@ function dateInputValue(value, timeZone) {
 
 export default function RecurringView({ initialTab = 'all' }) {
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [viewMode, setViewMode] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'grid' : 'table'
+  ));
   const [loading, setLoading] = useState(true);
   const [schedules, setSchedules] = useState([]);
   const [occurrences, setOccurrences] = useState([]);
@@ -204,12 +207,12 @@ export default function RecurringView({ initialTab = 'all' }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 border-b border-[var(--border)] pb-2 text-xs font-semibold">
+      <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto overscroll-x-contain border-b border-[var(--border)] pb-2 text-xs font-semibold">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`rounded-lg px-3.5 py-2 transition ${
+            className={`shrink-0 whitespace-nowrap rounded-lg px-3.5 py-2 transition ${
               activeTab === tab.id
                 ? 'bg-[var(--primary-soft)] text-[var(--primary)]'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] hover:text-[var(--text)]'
@@ -219,6 +222,31 @@ export default function RecurringView({ initialTab = 'all' }) {
           </button>
         ))}
       </div>
+
+      {activeTab !== 'pending' && (
+        <div className="flex justify-end">
+          <div role="group" aria-label="Recurring transaction view" className="inline-flex items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] p-0.5">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              aria-label="Grid view"
+              aria-pressed={viewMode === 'grid'}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${viewMode === 'grid' ? 'bg-[var(--primary-soft)] text-[var(--primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'}`}
+            >
+              <LayoutGrid className="size-3.5" /> Grid
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              aria-label="Table view"
+              aria-pressed={viewMode === 'table'}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${viewMode === 'table' ? 'bg-[var(--primary-soft)] text-[var(--primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'}`}
+            >
+              <Table2 className="size-3.5" /> Table
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Pending Occurrences Alert if on Pending tab */}
       {activeTab === 'pending' && (
@@ -258,71 +286,90 @@ export default function RecurringView({ initialTab = 'all' }) {
 
       {/* Schedules List */}
       {activeTab !== 'pending' && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-xs overflow-hidden">
+        <div className={viewMode === 'grid' ? '' : 'overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-xs'}>
           {loading ? (
             <div className="flex min-h-[300px] items-center justify-center">
               <RefreshCw className="size-6 animate-spin text-[var(--primary)]" />
             </div>
           ) : filteredSchedules.length > 0 ? (
-            <div className="divide-y divide-[var(--border)]">
-              {filteredSchedules.map((s) => {
-                const isIncome = s.type === 'income';
-                return (
-                  <div key={s._id} className="flex items-center justify-between p-4 text-xs hover:bg-[var(--surface-raised)]/40 transition">
-                    <div className="flex items-center gap-3">
-                      <div className={`grid size-9 place-items-center rounded-xl font-bold ${
-                        isIncome ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'
-                      }`}>
-                        <Repeat className="size-4" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm text-[var(--text)]">{s.description || 'Schedule'}</div>
-                        <div className="text-[11px] text-[var(--text-muted)]">
-                          {s.frequency} • {s.accountId?.name || 'Account'} • Next: {new Date(s.nextOccurrenceDate).toLocaleDateString()}
-                          {s.autoPostEnabled ? ' • (Auto-posts)' : ' • (Requires confirmation)'}
+            viewMode === 'grid' ? (
+              <div className={`grid grid-cols-1 gap-3 ${filteredSchedules.length === 1 ? 'max-w-xl' : filteredSchedules.length === 2 ? 'max-w-4xl sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
+                {filteredSchedules.map((s) => {
+                  const isIncome = s.type === 'income';
+                  const cannotEdit = ['completed', 'cancelled'].includes(s.status);
+                  return (
+                    <article key={s._id} className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-xs transition hover:-translate-y-0.5 hover:border-[var(--primary)]/40 hover:shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${isIncome ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'}`}>
+                            <Repeat className="size-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="truncate text-sm font-semibold text-[var(--text)]">{s.description || 'Schedule'}</h3>
+                            <p className="mt-0.5 text-[11px] capitalize text-[var(--text-muted)]">{s.frequency} • {s.type}</p>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <div className={`font-mono font-bold text-sm ${isIncome ? 'text-emerald-600' : 'text-[var(--text)]'}`}>
-                          {isIncome ? '+' : '−'}{s.currency} {formatCurrencyAmount(s.amount, s.currency)}
-                        </div>
-                        <span className={`inline-block rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-                          s.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
-                        }`}>
+                        <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${s.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'}`}>
                           {s.status}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(s)}
-                          disabled={['completed', 'cancelled'].includes(s.status)}
-                          aria-label={`Edit ${s.description || 'recurring schedule'}`}
-                          title={['completed', 'cancelled'].includes(s.status) ? 'Completed schedules cannot be edited' : 'Edit schedule'}
-                          className="grid size-8 place-items-center rounded-lg text-[var(--text-muted)] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          <Pencil className="size-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSchedule(s)}
-                          aria-label={`Delete ${s.description || 'recurring schedule'}`}
-                          title="Delete schedule"
-                          className="grid size-8 place-items-center rounded-lg text-[var(--text-muted)] transition hover:bg-rose-500/10 hover:text-rose-600"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                     <div className="flex items-center justify-between mt-4">
+                       <p className={` font-mono text-base font-bold ${isIncome ? 'text-emerald-600' : 'text-[var(--text)]'}`}>
+                        {isIncome ? '+' : '−'}{s.currency} {formatCurrencyAmount(s.amount, s.currency)}
+                      </p>
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-medium ${s.autoPostEnabled ? 'bg-emerald-500/10 text-emerald-700' : 'bg-[var(--surface-raised)] text-[var(--text-secondary)]'}`}>
+                          {s.autoPostEnabled ? 'Auto-post enabled' : 'Confirmation required'}
+                        </span>
+                     </div>
+                      <dl className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] gap-3 border-t border-[var(--border)] pt-3 text-[11px]">
+                        <div className="min-w-0"><dt className="text-[var(--text-muted)]">Account</dt><dd className="mt-0.5 truncate font-medium text-[var(--text)]">{s.accountId?.name || 'Account'}</dd></div>
+                        <div className="min-w-0">
+                          <dt className="text-[var(--text-muted)]">Next due</dt>
+                          <dd className="mt-0.5 flex min-w-0 items-center justify-between gap-1 font-medium text-[var(--text)]">
+                            <span className="truncate">{new Date(s.nextOccurrenceDate).toLocaleDateString()}</span>
+                            <span className="flex shrink-0 items-center gap-0.5">
+                              <button type="button" onClick={() => openEditModal(s)} disabled={cannotEdit} aria-label={`Edit ${s.description || 'recurring schedule'}`} title={cannotEdit ? 'Completed schedules cannot be edited' : 'Edit schedule'} className="grid size-7 place-items-center rounded-md text-[var(--text-muted)] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-40"><Pencil className="size-3.5" /></button>
+                              <button type="button" onClick={() => handleDeleteSchedule(s)} aria-label={`Delete ${s.description || 'recurring schedule'}`} title="Delete schedule" className="grid size-7 place-items-center rounded-md text-[var(--text-muted)] transition hover:bg-rose-500/10 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><Trash2 className="size-3.5" /></button>
+                            </span>
+                          </dd>
+                        </div>
+                      </dl>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[850px] text-left text-xs">
+                  <thead className="border-b border-[var(--border)] bg-[var(--surface-raised)] text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    <tr><th className="px-4 py-3">Schedule</th><th className="px-4 py-3">Type</th><th className="px-4 py-3">Account</th><th className="px-4 py-3">Frequency</th><th className="px-4 py-3">Next due</th><th className="px-4 py-3 text-right">Amount</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Actions</th></tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)]">
+                    {filteredSchedules.map((s) => {
+                      const isIncome = s.type === 'income';
+                      const cannotEdit = ['completed', 'cancelled'].includes(s.status);
+                      return (
+                        <tr key={s._id} className="transition hover:bg-[var(--surface-raised)]/40">
+                          <td className="px-4 py-3 font-semibold text-[var(--text)]">{s.description || 'Schedule'}<span className="mt-0.5 block text-[10px] font-normal text-[var(--text-muted)]">{s.autoPostEnabled ? 'Auto-post enabled' : 'Manual confirmation'}</span></td>
+                          <td className="px-4 py-3 capitalize text-[var(--text-secondary)]">{s.type}</td>
+                          <td className="px-4 py-3 text-[var(--text-secondary)]">{s.accountId?.name || 'Account'}</td>
+                          <td className="px-4 py-3 capitalize text-[var(--text-secondary)]">{s.frequency}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-[var(--text-secondary)]">{new Date(s.nextOccurrenceDate).toLocaleDateString()}</td>
+                          <td className={`px-4 py-3 whitespace-nowrap text-right font-mono font-bold ${isIncome ? 'text-emerald-600' : 'text-[var(--text)]'}`}>{isIncome ? '+' : '−'}{s.currency} {formatCurrencyAmount(s.amount, s.currency)}</td>
+                          <td className="px-4 py-3"><span className={`inline-block rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${s.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'}`}>{s.status}</span></td>
+                          <td className="px-4 py-3"><div className="flex justify-end gap-1">
+                            <button type="button" onClick={() => openEditModal(s)} disabled={cannotEdit} aria-label={`Edit ${s.description || 'recurring schedule'}`} title={cannotEdit ? 'Completed schedules cannot be edited' : 'Edit schedule'} className="grid size-8 place-items-center rounded-lg text-[var(--text-muted)] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-40"><Pencil className="size-4" /></button>
+                            <button type="button" onClick={() => handleDeleteSchedule(s)} aria-label={`Delete ${s.description || 'recurring schedule'}`} title="Delete schedule" className="grid size-8 place-items-center rounded-lg text-[var(--text-muted)] transition hover:bg-rose-500/10 hover:text-rose-600"><Trash2 className="size-4" /></button>
+                          </div></td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center text-sm text-[var(--text-secondary)]">
+            <div className={`flex flex-col items-center justify-center py-16 text-center text-sm text-[var(--text-secondary)] ${viewMode === 'grid' ? 'rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-xs' : ''}`}>
               <p className="font-semibold">No recurring schedules found</p>
               <button
                 onClick={openCreateModal}

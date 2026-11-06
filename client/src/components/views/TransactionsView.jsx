@@ -5,11 +5,13 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  LayoutGrid,
   Pencil,
   Plus, 
   RefreshCw, 
   RotateCcw, 
   Search, 
+  Table2,
   Trash2, 
   X 
 } from 'lucide-react';
@@ -32,6 +34,9 @@ function getVisiblePages(currentPage, totalPages) {
 export default function TransactionsView({ initialTab = 'all' }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [viewMode, setViewMode] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'grid' : 'table'
+  ));
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
@@ -353,7 +358,7 @@ export default function TransactionsView({ initialTab = 'all' }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto border-b border-[var(--border)] pb-2 text-xs font-semibold">
+      <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto overscroll-x-contain border-b border-[var(--border)] pb-2 text-xs font-semibold">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -361,7 +366,7 @@ export default function TransactionsView({ initialTab = 'all' }) {
               setActiveTab(tab.id);
               setPage(1);
             }}
-            className={`rounded-lg px-3.5 py-2 transition ${
+            className={`shrink-0 whitespace-nowrap rounded-lg px-3.5 py-2 transition ${
               activeTab === tab.id
                 ? 'bg-[var(--primary-soft)] text-[var(--primary)] font-semibold'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] hover:text-[var(--text)]'
@@ -384,26 +389,106 @@ export default function TransactionsView({ initialTab = 'all' }) {
             className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] py-2 pl-9 pr-3 text-xs text-[var(--text)] placeholder-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none"
           />
         </form>
-        <button
-          onClick={() => {
-            loadTransactions(activeTab, submittedSearch, page, limit);
-          }}
-          className="inline-flex items-center gap-1.5 self-start sm:self-auto rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]"
-        >
-          <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <div role="group" aria-label="Transaction view" className="inline-flex items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] p-0.5">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              aria-label="Grid view"
+              aria-pressed={viewMode === 'grid'}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${viewMode === 'grid' ? 'bg-[var(--primary-soft)] text-[var(--primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'}`}
+            >
+              <LayoutGrid className="size-3.5" /> Grid
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              aria-label="Table view"
+              aria-pressed={viewMode === 'table'}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${viewMode === 'table' ? 'bg-[var(--primary-soft)] text-[var(--primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'}`}
+            >
+              <Table2 className="size-3.5" /> Table
+            </button>
+          </div>
+          <button
+            onClick={() => loadTransactions(activeTab, submittedSearch, page, limit)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]"
+          >
+            <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Transactions Table / List */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-xs overflow-hidden">
+      <div className={viewMode === 'grid' ? 'space-y-3' : 'overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-xs'}>
         {loading ? (
           <div className="flex min-h-[300px] items-center justify-center">
             <RefreshCw className="size-6 animate-spin text-[var(--primary)]" />
           </div>
         ) : transactions.length > 0 ? (
+          viewMode === 'grid' ? (
+            <div className={`grid grid-cols-1 gap-3 ${transactions.length === 1 ? 'max-w-xl' : transactions.length === 2 ? 'max-w-4xl sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
+              {transactions.map((tx) => {
+                const isIncome = tx.type === 'income';
+                const isRefund = tx.type === 'refund';
+                const isTransfer = tx.type === 'transfer';
+                const txAmount = tx.amount ?? majorUnitsFromMinor(tx.amountMinor, tx.currency);
+                return (
+                  <article key={tx._id} className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-xs transition hover:-translate-y-0.5 hover:border-[var(--primary)]/40 hover:shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[var(--text)]">{tx.description || 'No description'}</p>
+                        <p className="mt-1 text-[11px] text-[var(--text-muted)]">{new Date(tx.transactionDate).toLocaleDateString()}</p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1">
+                      <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                        isIncome ? 'bg-emerald-500/10 text-emerald-600' : isRefund ? 'bg-sky-500/10 text-sky-600' : isTransfer ? 'bg-indigo-500/10 text-indigo-600' : 'bg-rose-500/10 text-rose-600'
+                      }`}>{tx.type}</span>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between gap-2">
+                      <p className={`min-w-0 break-words font-mono text-base font-bold ${
+                        isIncome ? 'text-emerald-600' : isRefund ? 'text-sky-600' : isTransfer ? 'text-indigo-600' : 'text-[var(--text)]'
+                      }`}>
+                        {isIncome || isRefund ? '+' : isTransfer ? '' : '−'}{tx.currency} {formatCurrencyAmount(txAmount, tx.currency)}
+                      </p>
+                      <span className="flex shrink-0 items-center gap-0.5">
+                        {activeTab === 'trash' ? (
+                          <button type="button" onClick={() => handleRestore(tx._id)} aria-label={`Restore ${tx.description || 'transaction'}`} title="Restore transaction" className="grid size-7 place-items-center rounded-md text-emerald-600 transition hover:bg-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
+                            <RotateCcw className="size-3.5" />
+                          </button>
+                        ) : (
+                          <>
+                            <button type="button" onClick={() => handleOpenEdit(tx)} aria-label={`Edit ${tx.description || 'transaction'}`} title="Edit transaction" className="grid size-7 place-items-center rounded-md text-[var(--text-muted)] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]">
+                              <Pencil className="size-3.5" />
+                            </button>
+                            <button type="button" onClick={() => handleSoftDelete(tx._id)} aria-label={`Delete ${tx.description || 'transaction'}`} title="Move to trash" className="grid size-7 place-items-center rounded-md text-[var(--text-muted)] transition hover:bg-rose-500/10 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">
+                              <Trash2 className="size-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                    <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-[var(--border)] pt-3 text-[11px]">
+                      <div className="min-w-0">
+                        <dt className="text-[var(--text-muted)]">Account</dt>
+                        <dd className="mt-0.5 truncate font-medium text-[var(--text)]">
+                          {tx.accountId?.name || 'Account'}{isTransfer && tx.destinationAccountId ? ` → ${tx.destinationAccountId.name}` : ''}
+                        </dd>
+                      </div>
+                      <div className="min-w-0">
+                        <dt className="text-[var(--text-muted)]">Category</dt>
+                        <dd className="mt-0.5 truncate font-medium text-[var(--text)]">{tx.categoryId?.name || (isTransfer ? 'Transfer' : 'Uncategorized')}</dd>
+                      </div>
+                    </dl>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full min-w-[760px] text-left text-xs">
               <thead className="border-b border-[var(--border)] bg-[var(--surface-raised)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Date</th>
@@ -492,8 +577,9 @@ export default function TransactionsView({ initialTab = 'all' }) {
               </tbody>
             </table>
           </div>
+          )
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center text-sm text-[var(--text-secondary)]">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] py-16 text-center text-sm text-[var(--text-secondary)]">
             <p className="font-semibold">No transactions found</p>
             <p className="mt-1 text-xs text-[var(--text-muted)]">
               {activeTab === 'trash' ? 'Trash is currently empty.' : 'Try adjusting your search filter or add a new transaction.'}
@@ -503,7 +589,7 @@ export default function TransactionsView({ initialTab = 'all' }) {
 
         {/* Pagination Bar */}
         {transactions.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[var(--border)] px-4 py-3 sm:px-6 text-xs text-[var(--text-secondary)]">
+          <div className={`flex flex-col items-center justify-between gap-3 px-4 py-3 text-xs text-[var(--text-secondary)] sm:flex-row sm:px-6 ${viewMode === 'grid' ? 'rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-xs' : 'border-t border-[var(--border)]'}`}>
             <div className="flex flex-wrap items-center gap-2">
               <span>
                 Showing <span className="font-semibold text-[var(--text)]">{pagination.total > 0 ? (page - 1) * limit + 1 : 0}</span> to{' '}

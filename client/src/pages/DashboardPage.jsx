@@ -10,6 +10,7 @@ import {
   LayoutDashboard, 
   LogOut, 
   Menu, 
+  Plus,
   Repeat, 
   Settings, 
   SlidersHorizontal, 
@@ -307,7 +308,9 @@ export default function DashboardPage() {
 
           <div className="flex items-center gap-2.5 sm:gap-3">
             {/* QuickActionDock in Navbar */}
-            <QuickActionDock onAdd={openQuickAddTransaction} />
+            <div className="hidden md:block">
+              <QuickActionDock onAdd={openQuickAddTransaction} />
+            </div>
 
             {/* Notifications Bell */}
             <div className="relative" ref={notifMenuRef}>
@@ -331,7 +334,7 @@ export default function DashboardPage() {
               </button>
 
               {notifOpen && (
-                <div className="absolute right-0 top-11 z-40 w-80 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 shadow-xl text-xs">
+                <div className="fixed right-3 top-[5rem] z-40 max-h-[calc(100dvh_-_6rem)] w-[min(20rem,calc(100vw_-_1.5rem))] overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs shadow-xl sm:absolute sm:right-0 sm:top-11 sm:max-h-[calc(100dvh_-_6rem)] sm:w-80">
                   <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2 font-semibold">
                     <span>Notifications</span>
                     <div className="flex items-center gap-2">
@@ -349,11 +352,11 @@ export default function DashboardPage() {
                   {notifications.length > 0 ? (
                     <div className="max-h-64 space-y-2 overflow-y-auto">
                       {notifications.map((notification) => (
-                        <div key={notification._id} className={`flex items-start gap-1 rounded-xl border p-2 ${notification.isRead ? 'border-[var(--border)] bg-[var(--surface-raised)]/30' : 'border-[var(--primary)]/25 bg-[var(--primary-soft)]/30'}`}>
+                        <div key={notification._id} className={`flex min-w-0 items-start gap-1 rounded-xl border p-2 ${notification.isRead ? 'border-[var(--border)] bg-[var(--surface-raised)]/30' : 'border-[var(--primary)]/25 bg-[var(--primary-soft)]/30'}`}>
                           <button
                             type="button"
                             onClick={() => handleOpenNotification(notification)}
-                            className="min-w-0 flex-1 rounded-lg p-1 text-left hover:bg-[var(--surface)]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
+                            className="min-w-0 flex-1 break-words rounded-lg p-1 text-left hover:bg-[var(--surface)]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
                           >
                             <span className={`mb-1 inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${notification.severity === 'danger' ? 'bg-rose-500/10 text-rose-600' : notification.severity === 'warning' ? 'bg-amber-500/10 text-amber-700' : notification.severity === 'success' ? 'bg-emerald-500/10 text-emerald-700' : 'bg-blue-500/10 text-blue-600'}`}>
                               {notification.type === 'budget_alert' ? 'Budget' : notification.type === 'recurring_reminder' ? 'Recurring' : notification.type === 'summary' ? 'Daily summary' : notification.type || 'Update'}
@@ -451,11 +454,21 @@ export default function DashboardPage() {
         </header>
 
         {/* Scrollable View Content */}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 lg:p-8">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 pb-24 sm:p-6 sm:pb-24 md:pb-8 lg:p-8">
           <div className="mx-auto max-w-7xl">
             {renderCurrentView()}
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => openQuickAddTransaction('expense')}
+          aria-label="Add transaction"
+          title="Add transaction"
+          className="fixed bottom-5 right-5 z-20 grid size-14 place-items-center rounded-full bg-[var(--primary)] text-white shadow-lg transition hover:scale-105 hover:opacity-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/30 active:scale-95 md:hidden"
+        >
+          <Plus size={23} strokeWidth={2.5} />
+        </button>
       </main>
 
      

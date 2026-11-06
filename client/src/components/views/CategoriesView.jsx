@@ -80,10 +80,10 @@ export default function CategoriesView({ initialType = 'expense' }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 border-b border-[var(--border)] pb-2 text-xs font-semibold">
+      <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto overscroll-x-contain border-b border-[var(--border)] pb-2 text-xs font-semibold">
         <button
           onClick={() => setActiveTab('expense')}
-          className={`rounded-lg px-4 py-2 transition ${
+          className={`shrink-0 whitespace-nowrap rounded-lg px-4 py-2 transition ${
             activeTab === 'expense'
               ? 'bg-[var(--primary-soft)] text-[var(--primary)]'
               : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] hover:text-[var(--text)]'
@@ -93,7 +93,7 @@ export default function CategoriesView({ initialType = 'expense' }) {
         </button>
         <button
           onClick={() => setActiveTab('income')}
-          className={`rounded-lg px-4 py-2 transition ${
+          className={`shrink-0 whitespace-nowrap rounded-lg px-4 py-2 transition ${
             activeTab === 'income'
               ? 'bg-[var(--primary-soft)] text-[var(--primary)]'
               : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] hover:text-[var(--text)]'
