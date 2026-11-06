@@ -74,7 +74,7 @@ export default function Navbar() {
             </a>
 
             <Button
-              href={getAppUrl('/register')}
+              href={getAppUrl('/login')}
               variant="primary"
               size="sm"
               icon={ArrowRight}
@@ -123,7 +123,7 @@ export default function Navbar() {
                 Sign In
               </a>
               <Button
-                href={getAppUrl('/register')}
+                href={getAppUrl('/login')}
                 variant="primary"
                 size="md"
                 className="w-full justify-center"

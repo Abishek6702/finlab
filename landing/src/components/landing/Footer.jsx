@@ -75,7 +75,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href={getAppUrl('/register')} className="hover:text-[var(--text)] transition-colors">
+                <a href={getAppUrl('/login')} className="hover:text-[var(--text)] transition-colors">
                   Create Account
                 </a>
               </li>

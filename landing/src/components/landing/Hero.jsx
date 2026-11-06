@@ -47,7 +47,7 @@ export default function Hero() {
           {/* CTAs */}
           <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
             <Button
-              href={getAppUrl('/register')}
+              href={getAppUrl('/login')}
               variant="primary"
               size="lg"
               icon={ArrowRight}

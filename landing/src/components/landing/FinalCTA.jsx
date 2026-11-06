@@ -30,7 +30,7 @@ export default function FinalCTA() {
 
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
-                href={getAppUrl('/register')}
+                href={getAppUrl('/login')}
                 variant="white"
                 size="lg"
                 icon={ArrowRight}

@@ -64,7 +64,7 @@ export default function HowItWorks() {
         {/* Action prompt */}
         <div className="mt-12 text-center">
           <Button
-            href={getAppUrl('/register')}
+            href={getAppUrl('/login')}
             variant="primary"
             size="md"
             icon={ArrowRight}
