@@ -82,12 +82,25 @@ export function AuthProvider({ children }) {
     }
   }, [fetchCurrentUser]);
 
-  // Initial application mount: Attempt refresh using HttpOnly cookie
+  // Initial application mount: Attempt refresh using HttpOnly cookie or validate stored token
   useEffect(() => {
     let isMounted = true;
 
     const initializeAuth = async () => {
       try {
+        const storedToken = getAccessToken();
+        if (storedToken) {
+          try {
+            const userData = await fetchCurrentUser(storedToken);
+            if (userData && isMounted) {
+              setTokenState(storedToken);
+              setIsLoading(false);
+              return;
+            }
+          } catch {
+            // Token expired or invalid, proceed to refresh
+          }
+        }
         await refreshAccessToken();
       } catch {
         // Unauthenticated session
@@ -106,12 +119,21 @@ export function AuthProvider({ children }) {
       setUser(null);
     };
 
+    const handleStorageChange = (e) => {
+      if (e.key === 'save_future' && !e.newValue) {
+        setTokenState(null);
+        setUser(null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('auth:session-expired', handleSessionExpired);
     return () => {
       isMounted = false;
+      window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('auth:session-expired', handleSessionExpired);
     };
-  }, [refreshAccessToken]);
+  }, [fetchCurrentUser, refreshAccessToken]);
 
   // Logout (Current Device)
   const logout = async () => {
