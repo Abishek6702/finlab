@@ -91,8 +91,6 @@ export default function ReportsView({ initialTab = 'overview' }) {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setLoadError(null);
 
     fetchReports()
       .then(([summaryResponse, categoryResponse, cashFlowResponse]) => {
@@ -359,7 +357,7 @@ export default function ReportsView({ initialTab = 'overview' }) {
               </select>
             </span>
           </label>
-          <button type="button" onClick={() => setReloadKey((key) => key + 1)} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-xs font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-raised)] disabled:opacity-60">
+          <button type="button" onClick={() => { setLoading(true); setLoadError(null); setReloadKey((key) => key + 1); }} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-xs font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-raised)] disabled:opacity-60">
             <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} /> <span className="sm:hidden">Refresh</span>
           </button>
           <button type="button" onClick={handleExportCsv} disabled={exporting} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-3.5 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:opacity-95 disabled:opacity-60">
@@ -388,7 +386,7 @@ export default function ReportsView({ initialTab = 'overview' }) {
         <div role="alert" className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 text-center">
           <p className="text-sm font-semibold text-rose-600">We couldn’t load these reports</p>
           <p className="mt-1 text-xs text-[var(--text-secondary)]">{loadError}</p>
-          <button type="button" onClick={() => setReloadKey((key) => key + 1)} className="mt-4 rounded-lg bg-[var(--primary)] px-4 py-2 text-xs font-semibold text-white">Try again</button>
+          <button type="button" onClick={() => { setLoading(true); setLoadError(null); setReloadKey((key) => key + 1); }} className="mt-4 rounded-lg bg-[var(--primary)] px-4 py-2 text-xs font-semibold text-white">Try again</button>
         </div>
       ) : (
         <div className="space-y-5 sm:space-y-6">

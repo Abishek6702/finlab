@@ -49,10 +49,23 @@
   --info: #22D3EE;
 }
 html {
+  zoom: 0.9;
   min-width: 320px;
   min-height: 100%;
   background: var(--background);
   color: var(--text);
+}
+
+@supports not (zoom: 0.9) {
+  html {
+    /* font-size: 90%; */
+  }
+}
+
+@supports not (zoom: 0.9) {
+  html {
+    font-size: 90%;
+  }
 }
 
 body {
