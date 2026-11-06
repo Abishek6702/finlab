@@ -39,10 +39,19 @@ if (process.env.NODE_ENV === "development") {
 app.use("/api/", apiLimiter);
 
 // 4. Implement CORS correctly (Supports single URL, comma-separated URLs, and strips trailing slashes)
-const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:9001,http://localhost:9002")
+const defaultAllowedOrigins = [
+  "http://localhost:9001",
+  "http://localhost:9002",
+  "https://finlab-save.vercel.app",
+  "https://finlab-core.vercel.app",
+];
+
+const customOrigins = (process.env.FRONTEND_URL || "")
   .split(",")
   .map((url) => url.trim().replace(/\/+$/, ""))
   .filter(Boolean);
+
+const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...customOrigins]));
 
 app.use(
   cors({

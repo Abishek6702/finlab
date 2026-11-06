@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import ThemeToggle from '../common/ThemeToggle';
 
 const bars = [36, 52, 43, 64, 57, 76, 62, 90, 73, 100, 84, 112];
+const landingUrl = import.meta.env.VITE_LANDING_URL || '';
 
 export default function AuthLayout({ children, heading, subheading }) {
   return (
@@ -9,9 +10,25 @@ export default function AuthLayout({ children, heading, subheading }) {
       <section className="flex min-h-screen flex-col items-center justify-center px-5 py-8 sm:px-10 lg:px-16 xl:px-20">
         <div className="w-full max-w-[390px]">
           <div className="mb-8 flex items-center justify-between">
-            <Link to="/" className="inline-flex items-center gap-2.5 text-[21px] font-bold tracking-tight text-[var(--text)] no-underline" aria-label="FinLab home">
-              <span className="grid size-9 place-items-center rounded-xl bg-[var(--primary)] text-sm text-white">FL</span><span>FinLab</span>
-            </Link>
+            {landingUrl ? (
+              <a
+                href={landingUrl}
+                className="inline-flex items-center gap-2.5 text-[21px] font-bold tracking-tight text-[var(--text)] no-underline hover:opacity-90 transition-opacity"
+                aria-label="FinLab home"
+              >
+                <span className="grid size-9 place-items-center rounded-xl bg-[var(--primary)] text-sm text-white">FL</span>
+                <span>FinLab</span>
+              </a>
+            ) : (
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2.5 text-[21px] font-bold tracking-tight text-[var(--text)] no-underline"
+                aria-label="FinLab home"
+              >
+                <span className="grid size-9 place-items-center rounded-xl bg-[var(--primary)] text-sm text-white">FL</span>
+                <span>FinLab</span>
+              </Link>
+            )}
             <ThemeToggle compact />
           </div>
           <h1 className="m-0 text-[28px] leading-tight font-bold tracking-tight text-[var(--text)]">{heading}</h1>
