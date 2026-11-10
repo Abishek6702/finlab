@@ -32,6 +32,7 @@ import SavingsGoalsView from '../components/views/SavingsGoalsView';
 import ReportsView from '../components/views/ReportsView';
 import SettingsView from '../components/views/SettingsView';
 import QuickActionDock from '../components/common/QuickActionDock';
+import SidebarInstallBanner from '../components/common/SidebarInstallBanner';
 import { notificationApi } from '../api/apiClient';
 
 // Finalized navigation structure matching Part 4
@@ -94,7 +95,7 @@ function Sidebar({ mobile = false, mobileOpen = false, onNavigate, collapsed = f
       </div>
 
       {/* Nav Groups */}
-      <div className="space-y-6">
+      <div className="space-y-6 flex-1">
         {navSections.map((sec) => (
           <div key={sec.group}>
             {(!collapsed || mobile) && (
@@ -131,6 +132,9 @@ function Sidebar({ mobile = false, mobileOpen = false, onNavigate, collapsed = f
           </div>
         ))}
       </div>
+
+      {/* Sidebar Install Banner */}
+      <SidebarInstallBanner collapsed={collapsed} mobile={mobile} />
     </aside>
   );
 }

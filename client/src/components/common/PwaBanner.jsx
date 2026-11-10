@@ -143,8 +143,8 @@ export default function PwaBanner() {
         </div>
       )}
 
-      {/* 4. Android / Browser Install Prompt Banner */}
-      {canInstall && !installDismissed && (
+      {/* 4. Android / Browser Install Prompt Banner (Auth / Non-Sidebar Pages) */}
+      {canInstall && !installDismissed && (typeof window !== 'undefined' && ['/login', '/register', '/forgot-password', '/reset-password'].includes(window.location.pathname)) && (
         <div
           role="region"
           aria-label="Install FinLab App"
