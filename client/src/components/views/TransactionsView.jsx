@@ -386,7 +386,7 @@ export default function TransactionsView({ initialTab = 'all' }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by description, notes or tags..."
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] py-2 pl-9 pr-3 text-xs text-[var(--text)] placeholder-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] py-2 pl-9 pr-3 text-xs focus:border-[var(--primary)] focus:outline-none"
           />
         </form>
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">

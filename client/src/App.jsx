@@ -7,10 +7,13 @@ import DashboardPage from './pages/DashboardPage';
 import OnboardingPage from './pages/OnboardingPage';
 import ProtectedRoute from './routes/ProtectedRoute';
 import PublicRoute from './routes/PublicRoute';
+import PwaBanner from './components/common/PwaBanner';
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <PwaBanner />
+      <Routes>
       {/* Public / Unauthenticated routes (Redirects authenticated users to dashboard) */}
       <Route
         path="/login"
@@ -80,5 +83,6 @@ export default function App() {
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    </>
   );
 }

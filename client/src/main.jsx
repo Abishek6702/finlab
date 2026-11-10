@@ -5,6 +5,10 @@ import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import './index.css'
 import App from './App.jsx'
+import { registerServiceWorker } from './pwa/pwaManager'
+
+// Initialize Progressive Web App Service Worker
+registerServiceWorker();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

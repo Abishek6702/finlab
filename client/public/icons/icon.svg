@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1D4ED8" />
+      <stop offset="100%" stop-color="#0F2870" />
+    </linearGradient>
+    <radialGradient id="ambientGlow" cx="0%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="stemGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#E0E7FF" />
+    </linearGradient>
+    <linearGradient id="midGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#93C5FD" />
+    </linearGradient>
+    <linearGradient id="baseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#DBEAFE" />
+      <stop offset="60%" stop-color="#60A5FA" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <linearGradient id="growthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#34D399" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background squircle -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect width="512" height="512" rx="112" fill="url(#ambientGlow)" />
+
+  <!-- Monogram F vertical stem -->
+  <rect x="138" y="126" width="54" height="260" rx="22" fill="url(#stemGrad)" />
+
+  <!-- Top bar of F -->
+  <path d="M 172 126 L 346 126 A 22 22 0 0 1 368 148 L 368 180 L 172 180 Z" fill="#FFFFFF" />
+
+  <!-- Middle bar of F -->
+  <path d="M 172 224 L 288 224 A 20 20 0 0 1 308 244 L 308 272 L 172 272 Z" fill="url(#midGrad)" />
+
+  <!-- Bottom L base arm -->
+  <path d="M 172 334 L 268 334 A 22 22 0 0 1 290 356 L 290 386 L 172 386 Z" fill="url(#baseGrad)" />
+
+  <!-- Upward growth diamond accent -->
+  <polygon points="356,204 388,246 356,288 324,246" fill="url(#growthGrad)" />
+
+  <!-- High-trajectory satellite indicator -->
+  <circle cx="356" cy="150" r="12" fill="#38BDF8" />
+</svg>
+
